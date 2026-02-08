@@ -4,226 +4,169 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Segmentation Service - Test Suite</title>
+  <title>Segmentation Rule Tester</title>
   <style>
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
-      max-width: 900px;
-      margin: 40px auto;
-      padding: 0 20px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f4f4f9;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      height: 95vh;
     }
 
     h1 {
+      text-align: center;
       margin-bottom: 20px;
+      color: #444;
     }
 
-    table {
+    .container {
+      display: flex;
+      flex: 1;
+      gap: 20px;
+    }
+
+    .pane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .pane h2 {
+      margin-top: 0;
+      font-size: 1.2rem;
+      color: #555;
+      border-bottom: 2px solid #eee;
+      padding-bottom: 10px;
+      margin-bottom: 15px;
+    }
+
+    textarea {
+      flex: 1;
       width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-
-    th,
-    td {
-      border: 1px solid #ddd;
-      padding: 12px;
-      text-align: left;
-    }
-
-    th {
-      background: #f5f5f5;
-    }
-
-    .pass {
-      background: #d4edda;
-    }
-
-    .fail {
-      background: #f8d7da;
-    }
-
-    .pending {
-      background: #fff3cd;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 10px;
+      resize: none;
+      box-sizing: border-box;
+      background-color: #fafafa;
     }
 
     button {
-      padding: 10px 20px;
+      margin-top: 15px;
+      padding: 12px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
       font-size: 16px;
       cursor: pointer;
+      transition: background-color 0.2s;
+      align-self: center;
+      width: 50%;
+    }
+
+    button:hover {
+      background-color: #0056b3;
     }
 
     pre {
-      background: #f5f5f5;
-      padding: 10px;
-      overflow-x: auto;
-      font-size: 12px;
+      flex: 1;
+      background-color: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 4px;
+      overflow: auto;
       margin: 0;
+      font-family: 'Consolas', 'Monaco', monospace;
     }
 
-    .rule {
-      font-size: 10px;
-      color: #666;
-      font-family: monospace;
-      margin-top: 4px;
+    .error {
+      color: #ff6b6b;
     }
   </style>
 </head>
 
 <body>
-  <h1>Segmentation Service - Test Suite</h1>
-  <button onclick="runTests()">Run Tests</button>
-  <table>
-    <thead>
-      <tr>
-        <th>Test</th>
-        <th>Status</th>
-        <th>Details</th>
-      </tr>
-    </thead>
-    <tbody id="results"></tbody>
-  </table>
+
+  <h1>Segmentation Rule Evaluator</h1>
+
+  <div class="container">
+    <!-- Left Pane: Input -->
+    <div class="pane">
+      <h2>Input JSON (User & Segments)</h2>
+      <textarea id="jsonInput">{
+    "user": {
+        "id": 101,
+        "level": 25,
+        "country": "Turkey",
+        "last_login_days_ago": 2,
+        "purchase_amount": 5000
+    },
+    "segments": {
+        "is_vip": "level > 20",
+        "is_turkey": "country = 'Turkey'",
+        "high_spender": "purchase_amount >= 10000",
+        "active_user": "last_login_days_ago < 7"
+    }
+}</textarea>
+      <button onclick="evaluateRules()">Test Et</button>
+    </div>
+
+    <!-- Right Pane: Output -->
+    <div class="pane">
+      <h2>Result</h2>
+      <pre id="resultOutput">// Results will appear here...</pre>
+    </div>
+  </div>
 
   <script>
-    const now = Math.floor(Date.now() / 1000);
-    const baseUser = {
-      id: "user-123",
-      level: 15,
-      country: "Turkey",
-      first_session: 1672531200,
-      last_session: now,
-      purchase_amount: 15000,
-      last_purchase_at: now
-    };
+    async function evaluateRules() {
+      const inputArea = document.getElementById('jsonInput');
+      const outputArea = document.getElementById('resultOutput');
+      const rawInput = inputArea.value;
 
-    const tests = [
-      {
-        name: "Level greater than",
-        request: {
-          user: baseUser,
-          segments: {
-            high_level: "level > 10"
-          }
-        },
-        expected: { high_level: true }
-      },
-      {
-        name: "Level less than",
-        request: {
-          user: baseUser,
-          segments: {
-            low_level: "level < 10"
-          }
-        },
-        expected: { low_level: false }
-      },
-      {
-        name: "Country equality",
-        request: {
-          user: baseUser,
-          segments: {
-            turkish_user: "country = 'Turkey'"
-          }
-        },
-        expected: { turkish_user: true }
-      },
-      {
-        name: "Multiple conditions with AND",
-        request: {
-          user: baseUser,
-          segments: {
-            turkish_spenders: "country = 'Turkey' and purchase_amount >= 10000"
-          }
-        },
-        expected: { turkish_spenders: true }
-      },
-      {
-        name: "Multiple segments",
-        request: {
-          user: baseUser,
-          segments: {
-            high_level: "level > 10",
-            turkish_user: "country = 'Turkey'",
-            big_spender: "purchase_amount >= 10000"
-          }
-        },
-        expected: { high_level: true, turkish_user: true, big_spender: true }
-      },
-      {
-        name: "Date-based filter with _now()",
-        request: {
-          user: baseUser,
-          segments: {
-            recent_purchase: "last_purchase_at > _now() - 7*24*60*60"
-          }
-        },
-        expected: { recent_purchase: true }
-      },
-      {
-        name: "Missing field in user document - should return 400",
-        request: {
-          user: {
-            id: "user-123",
-            level: 15
-          },
-          segments: {
-            high_level: "non_existent_field > 10"
-          }
-        },
-        expectedStatus: 400
+      // 1. Validate JSON syntax locally
+      let requestData;
+      try {
+        requestData = JSON.parse(rawInput);
+      } catch (e) {
+        outputArea.innerHTML = `<span class="error">Invalid JSON syntax: ${e.message}</span>`;
+        return;
       }
-    ];
 
-    async function runTests() {
-      const tbody = document.getElementById("results");
-      tbody.innerHTML = "";
+      outputArea.textContent = "Processing...";
 
-      for (const test of tests) {
-        const row = document.createElement("tr");
-        row.className = "pending";
-        const segments = Object.entries(test.request.segments)
-          .map(([k, v]) => `${k}: ${v}`)
-          .join(", ");
-        row.innerHTML = `
-          <td>${test.name}<div class="rule">${segments}</div></td>
-          <td>Running...</td>
-          <td></td>
-        `;
-        tbody.appendChild(row);
+      // 2. Send POST request
+      try {
+        const response = await fetch('/evaluate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestData)
+        });
 
-        try {
-          const response = await fetch("/evaluate", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(test.request)
-          });
+        const data = await response.json();
 
-          if (test.expectedStatus) {
-            const passed = response.status === test.expectedStatus;
-            row.className = passed ? "pass" : "fail";
-            row.cells[1].textContent = passed ? "PASS" : "FAIL";
-            row.cells[2].innerHTML = `
-              <pre>Expected status: ${test.expectedStatus}\nGot: ${response.status}</pre>
-            `;
-          } else {
-            if (!response.ok) {
-              throw new Error(`HTTP ${response.status}`);
-            }
+        // Format JSON output
+        outputArea.textContent = JSON.stringify(data, null, 4);
 
-            const data = await response.json();
-            const sortedStringify = (obj) => JSON.stringify(Object.keys(obj).sort().reduce((acc, key) => { acc[key] = obj[key]; return acc; }, {}));
-            const passed = sortedStringify(data.results) === sortedStringify(test.expected);
-
-            row.className = passed ? "pass" : "fail";
-            row.cells[1].textContent = passed ? "PASS" : "FAIL";
-            row.cells[2].innerHTML = `
-              <pre>Expected: ${JSON.stringify(test.expected)}\nGot: ${JSON.stringify(data.results)}</pre>
-            `;
-          }
-        } catch (err) {
-          row.className = "fail";
-          row.cells[1].textContent = "ERROR";
-          row.cells[2].innerHTML = `<pre>${err.message}</pre>`;
+        if (!response.ok) {
+          outputArea.classList.add('error');
+        } else {
+          outputArea.classList.remove('error');
         }
+
+      } catch (err) {
+        outputArea.innerHTML = `<span class="error">Network/Server Error: ${err.message}</span>`;
       }
     }
   </script>
