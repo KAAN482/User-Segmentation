@@ -27,3 +27,23 @@ The server will start on port 3000.
 
 - `GET /evaluate`: Returns the `test.html` page.
 - `POST /evaluate`: Accepts JSON data, prints it, and returns `{"status": "pending"}`.
+
+## Docker Support
+
+You can also run this application using Docker.
+
+### Build the Image
+```bash
+docker build -t user-segmentation .
+```
+
+### Run the Container
+```bash
+# Run on port 3000
+docker run -p 3000:3000 user-segmentation
+
+# Run on a different port (e.g., 4000) mapped to internal 3000
+# Note: You can also override the internal PORT env var if needed: -e PORT=4000
+docker run -p 4000:3000 user-segmentation
+```
+

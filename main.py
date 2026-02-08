@@ -96,6 +96,10 @@ def evaluate_post():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    # Running on port 3000 as requested
-    app.run(port=3000, debug=True)
+    # Get port from environment variable or default to 3000
+    # This is critical for deployments (e.g. Heroku, Docker) where the port is assigned dynamically.
+    port = int(os.environ.get('PORT', 3000))
+    
+    # Host must be '0.0.0.0' to make the server accessible from outside the container.
+    app.run(host='0.0.0.0', port=port, debug=True)
 
