@@ -1,42 +1,38 @@
-# Session Log - 2026-02-08
+# Antigravity Transcript - User Segmentation Project
 
-## Actions Taken
-1.  **Project Initialization**:
-    -   Cloned repository `https://github.com/KAAN482/User-Segmentation.git`.
-    -   Created `.gitignore` for Python and venv.
-    -   Created virtual environment `venv`.
-    -   Created `transcripts/` directory.
+## Project Overview
+This project implements a user segmentation engine using Flask and in-memory SQLite. It evaluates users against dynamic SQL-like rules.
 
-2.  **Flask Setup**:
-    -   Created `requirements.txt` with `flask`.
-    -   Installed dependencies using `pip`.
-    -   Updated `main.py` to be a Flask application running on port 3000.
-    -   Implemented `GET /evaluate` to serve `test.html`.
-    -   Implemented `POST /evaluate` to echo JSON data.
-    -   Created `test.html` (dummy).
-    -   Created `README.md`.
+## Timeline of Actions
 
-3.  **Version Control**:
-    -   Fixed `.gitignore` to properly ignore `venv` and other system files.
-    -   Committed and pushed initial changes to the `main` branch.
+1.  **Initialization**:
+    -   Setup git, venv, and structure.
+    -   Connected to GitHub repo.
 
-4.  **Debugging & Fixes**:
-    -   User reported `ModuleNotFoundError: No module named 'flask'` (Dependency installation verification).
-    -   User manually installed Flask.
-    -   User reported **404 Not Found** at root `/`.
-    -   **FIX**: Added `@app.route('/')` to `main.py` to handle the root URL and guide the user to `/evaluate`.
+2.  **Core Implementation**:
+    -   Created Flask app (`app.py` - formerly `main.py`).
+    -   Implemented `validator.py` for input checking.
+    -   Implemented `evaluator.py` for segmentation logic (SQLite + `_now()` replacement).
 
-5.  **Feature Implementation**:
-    -   Implemented dynamic segmentation logic using `sqlite3` in-memory database.
-    -   Added logic to create tables dynamically based on `user` properties.
-    -   Implemented `_now()` replacement with current Unix timestamp.
-    -   Added SQL execution for each segment rule in `POST /evaluate`.
-    -   Added error handling for invalid SQL rules (Returns 400).
-    -   Updated `main.py` imports (`sqlite3`, `time`).
+3.  **UI & Testing**:
+    -   Created `test.html` with a split-pane JSON editor for manual testing.
+    -   Created `examples/` directory with JSON test cases.
+    -   Documented `manual_tests.md` for curl/PowerShell/CMD testing.
 
-6.  **Test Verification**:
-    -   User provided a detailed `test.html`.
-    -   Identified a defective test case in `test.html` (Expected 400 for valid input).
-    -   **FIX**: Updated `test.html` to reference a non-existent field in the failing test case, ensuring it properly tests error handling.
-    -   Cleaned up imports in `main.py`.
-    -   Committed and pushed changes.
+4.  **Deployment**:
+    -   Dockerized the application (`Dockerfile`).
+    -   Configured dynamic port usage.
+    
+5.  **Documentation & Polish**:
+    -   Added English comments to all Python files.
+    -   Cleaned up unused files and imports.
+    -   Updated `README.md` with comprehensive instructions.
+
+## File Structure
+- `app.py`: Main entry point.
+- `evaluator.py`: Rule engine.
+- `validator.py`: logic validation.
+- `test.html`: Testing UI.
+- `examples/`: Sample JSON payloads.
+- `Dockerfile`: Container config.
+- `requirements.txt`: Dependencies.

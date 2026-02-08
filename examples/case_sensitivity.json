@@ -1,0 +1,9 @@
+{
+    "user": {
+        "country": "Turkey"
+    },
+    "segments": {
+        "is_turkey": "country = 'Turkey'",
+        "is_turkey_lowercase": "country = 'turkey'"
+    }
+}

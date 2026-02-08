@@ -1,0 +1,9 @@
+{
+    "user": {
+        "country": "Turkey",
+        "purchase_amount": 12000
+    },
+    "segments": {
+        "turkish_vip": "country = 'Turkey' AND purchase_amount >= 10000"
+    }
+}

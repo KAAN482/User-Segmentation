@@ -3,16 +3,20 @@ import os
 from validator import validate_input
 from evaluator import evaluate_rules
 
+# Initialize Flask application
 app = Flask(__name__)
 
 @app.route('/')
 def home():
+    """
+    Root endpoint. Returns a welcome message.
+    """
     return "<h1>Project Active!</h1><p>Go to <a href='/evaluate'>/evaluate</a> to test.</p>"
 
 @app.route('/evaluate', methods=['GET'])
 def evaluate_get():
     """
-    Serves the test.html file.
+    Serves the test.html file for browser-based testing.
     """
     try:
         return send_file('test.html')
@@ -22,33 +26,39 @@ def evaluate_get():
 @app.route('/evaluate', methods=['POST'])
 def evaluate_post():
     """
-    Evaluates user against a set of SQL-like rules.
+    Main evaluation endpoint.
+    Receives user data and segment rules in JSON format.
+    Returns the evaluation results (True/False) for each segment.
     """
     try:
         data = request.get_json()
         
-        # Validation
+        # 1. Validate Input
+        # Ensure 'user' and 'segments' keys exist
         is_valid, error_msg = validate_input(data)
         if not is_valid:
-            if "Invalid input." in error_msg and "key is required" in error_msg:
-                 return jsonify({"error": error_msg}), 400
-            # Keeping consistent with original logic handling
+            # Return 400 Bad Request if validation fails
             return jsonify({"error": error_msg}), 400
 
         user_data = data['user']
         segments = data['segments']
 
-        # Evaluation
+        # 2. Evaluate Rules
         try:
+            # Delegate logic to the evaluator module
             results = evaluate_rules(user_data, segments)
             return jsonify({"results": results})
+            
         except ValueError as e:
+            # Handle specific invalid rule errors from the evaluator (SQL syntax errors)
             return jsonify({"error": str(e)}), 400
+            
         except Exception as e:
-            # Re-raise for general 500 handler or handle safely
+            # Handle unexpected errors during evaluation
             return jsonify({"error": str(e)}), 500
 
     except Exception as e:
+        # Handle general server errors
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":

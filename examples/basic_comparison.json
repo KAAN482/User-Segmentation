@@ -1,0 +1,8 @@
+{
+    "user": {
+        "level": 15
+    },
+    "segments": {
+        "is_high_level": "level > 10"
+    }
+}
