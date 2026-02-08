@@ -1,83 +1,182 @@
-# User Segmentation Engine
+# User Segmentation Engine 🚀
 
-A lightweight, Dockerized Python service for evaluating users against dynamic SQL-like segmentation rules. Built with Flask and in-memory SQLite.
+![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)
+![Flask](https://img.shields.io/badge/Flask-2.0+-green.svg)
+![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)
 
-## Project Structure
+A high-performance, lightweight microservice for evaluating users against dynamic segmentation rules. Built with **Flask** and powered by **In-Memory SQLite** for rapid rule processing.
 
+## 📖 Table of Contents
+- [Overview](#overview)
+- [Key Features](#key-features)
+- [Project Architecture](#project-architecture)
+- [Installation](#installation)
+- [Usage](#usage)
+- [API Documentation](#api-documentation)
+- [Testing](#testing)
+- [Docker Deployment](#docker-deployment)
+
+---
+
+## 🧐 Overview
+This project solves the problem of dynamically categorizing users into segments based on real-time data. Instead of hardcoding rules, it accepts SQL-like conditions (e.g., `level > 10` or `country = 'TR'`) and evaluates them on the fly against a user object.
+
+It is designed to be:
+- **Stateless:** No persistent database required.
+- **Fast:** Uses SQLite in-memory mode (`:memory:`).
+- **Flexible:** Supports complex logic (AND/OR, comparisons) and custom functions like `_now()`.
+
+---
+
+## ✨ Key Features
+*   **Dynamic Rule Evaluation:** Rules are passed in the request, not hardcoded.
+*   **SQL-Based Syntax:** Use standard SQL WHERE clauses for rules.
+*   **Time-Aware:** Helper function `_now()` injects the current Unix timestamp for time-based segments (e.g., "last login < 7 days ago").
+*   **Input Validation:** Robust checking of JSON payloads.
+*   **Visual Testing UI:** Built-in split-pane HTML interface for easy testing.
+
+---
+
+## 🏗 Project Architecture
+
+The codebase is modularized for maintainability:
+
+```plaintext
+User-Segmentation/
+├── app.py                # 🚀 Entry point. Defines Flask routes and error handling.
+├── evaluator.py          # 🧠 Core Logic. detailed SQL evaluation engine.
+├── validator.py          # 🛡️ Validation Layer. Checks input integrity.
+├── test.html             # 🎨 Frontend. A modern UI for testing API payloads.
+├── Dockerfile            # 🐳 Container configuration.
+├── requirements.txt      # 📦 Python dependencies.
+├── manual_tests.md       # 🧪 Reference for curl/PowerShell commands.
+└── examples/             # 📂 Sample JSON payloads for quick testing.
 ```
-├─ app.py                # Main Flask application
-├─ evaluator.py          # SQL rule evaluation engine
-├─ validator.py          # Input validation logic
-├─ test.html             # Browser-based testing UI
-├─ examples/             # JSON examples for testing
-├─ manual_tests.md       # Curl/PowerShell test commands
-├─ Dockerfile            # Docker configuration
-└─ requirements.txt      # Python dependencies
-```
 
-## Features
-- **Dynamic Rules**: Define segmentation logic using SQL syntax (e.g., `level > 10`).
-- **In-Memory Evaluation**: Uses SQLite for fast, on-the-fly evaluation without persistent storage.
-- **Custom Functions**: Supports `_now()` for time-based comparisons.
-- **Docker Ready**: Ready for containerized deployment with dynamic port configuration.
+---
 
-## Installation & Running
+## ⚙️ Installation
 
-### 1. Local Python Environment
-```bash
-# Create and activate venv
-python -m venv venv
-# Windows:
-.\venv\Scripts\activate
-# Mac/Linux:
-source venv/bin/activate
+### Prerequisites
+- Python 3.9 or higher
+- pip (Python package manager)
 
-# Install dependencies
-pip install -r requirements.txt
+### Local Setup
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/KAAN482/User-Segmentation.git
+    cd User-Segmentation
+    ```
 
-# Run the server
-python app.py
-```
-The server will start on port **3000** (default).
+2.  **Create a Virtual Environment:**
+    ```bash
+    # Windows
+    python -m venv venv
+    .\venv\Scripts\activate
 
-### 2. Docker
-```bash
-# Build the image
-docker build -t user-segmentation .
+    # Mac/Linux
+    python3 -m venv venv
+    source venv/bin/activate
+    ```
 
-# Run the container (mapping port 3000)
-docker run -p 3000:3000 user-segmentation
-```
+3.  **Install Dependencies:**
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-## Testing
+4.  **Run the Application:**
+    ```bash
+    python app.py
+    ```
+    The server will start at `http://localhost:3000`.
+
+---
+
+## 🚀 Usage
 
 ### Browser UI (Recommended)
-1. Go to `http://localhost:3000/evaluate`.
-2. You will see a split-pane JSON editor.
-3. You can copy-paste JSON content from the `examples/` folder to test different scenarios.
+This is the easiest way to interact with the API.
 
-### Manual API Testing
-Refer to `manual_tests.md` for `curl` and PowerShell commands.
+1.  Start the server.
+2.  Navigate to [http://localhost:3000/evaluate](http://localhost:3000/evaluate).
+3.  You will see a JSON editor. Paste a sample JSON (prom `examples/` folder) and click **"Test Et"**.
+4.  View results instantly in the right pane.
 
-## API Usage
+### API Endpoints
 
-**POST** `/evaluate`
+#### `GET /`
+Returns a welcome message verifying the service is active.
 
-**Input:**
+#### `GET /evaluate`
+Serves the testing UI (`test.html`).
+
+#### `POST /evaluate`
+The core endpoint. Accepts a JSON body containing user data and segmentation rules.
+
+**Request Body:**
 ```json
 {
-    "user": { "level": 15, "country": "TR" },
+    "user": {
+        "id": 101,
+        "level": 15,
+        "country": "Turkey",
+        "last_login": 1700000000
+    },
     "segments": {
-        "is_vip": "level > 10"
+        "is_vip": "level > 10",
+        "is_tr": "country = 'Turkey'",
+        "active_recently": "last_login > _now() - 86400"
     }
 }
 ```
 
-**Output:**
+**Response:**
 ```json
 {
     "results": {
-        "is_vip": true
+        "is_vip": true,
+        "is_tr": true,
+        "active_recently": false
     }
 }
 ```
+
+---
+
+## 🐳 Docker Deployment
+
+You can containerize this application for production deployment.
+
+### 1. Build the Image
+```bash
+docker build -t user-segmentation .
+```
+
+### 2. Run the Container
+```bash
+# Run on port 3000
+docker run -p 3000:3000 user-segmentation
+
+# Run on a different port (e.g. 4000)
+docker run -p 4000:3000 -e PORT=3000 user-segmentation
+```
+
+---
+
+## 🧪 Testing
+
+### Manual Testing
+Refer to `manual_tests.md` for specific command-line instructions using:
+- **PowerShell** (`Invoke-RestMethod`)
+- **CMD** (`curl`)
+
+### Sample Data
+Check the `examples/` directory for ready-to-use JSON files:
+- `basic_comparison.json`: Simple numeric checks.
+- `case_sensitivity.json`: Testing string matching.
+- `multiple_conditions.json`: Complex logic with AND/OR.
+
+---
+
+## 📝 License
+This project is open-source and available for educational purposes.
