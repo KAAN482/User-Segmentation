@@ -17,4 +17,19 @@
     -   Created `README.md`.
 
 3.  **Version Control**:
-    -   Committed and pushed initial changes to GitHub.
+    -   Fixed `.gitignore` to properly ignore `venv` and other system files.
+    -   Committed and pushed initial changes to the `main` branch.
+
+4.  **Debugging & Fixes**:
+    -   User reported `ModuleNotFoundError: No module named 'flask'` (Dependency installation verification).
+    -   User manually installed Flask.
+    -   User reported **404 Not Found** at root `/`.
+    -   **FIX**: Added `@app.route('/')` to `main.py` to handle the root URL and guide the user to `/evaluate`.
+
+5.  **Feature Implementation**:
+    -   Implemented dynamic segmentation logic using `sqlite3` in-memory database.
+    -   Added logic to create tables dynamically based on `user` properties.
+    -   Implemented `_now()` replacement with current Unix timestamp.
+    -   Added SQL execution for each segment rule in `POST /evaluate`.
+    -   Added error handling for invalid SQL rules (Returns 400).
+    -   Updated `main.py` imports (`sqlite3`, `time`).
